@@ -9,7 +9,7 @@ public class NFAState {
   private List<NFAState> nextStates;
   private boolean accept;
 
-  private NFAState(boolean accept, Set<Character> transition, List<NFAState> nextStates) {
+  public NFAState(boolean accept, Set<Character> transition, List<NFAState> nextStates) {
     this.accept = accept;
     this.transition = transition;
     this.nextStates = nextStates;
@@ -36,6 +36,10 @@ public class NFAState {
     this(false, transition);
   }
 
+  public NFAState(Set<Character> transition, List<NFAState> nextStates) {
+    this(false, transition, nextStates);
+  }
+
   /**
    * The states we enter after accepting a character
    * @param c
@@ -59,6 +63,10 @@ public class NFAState {
     return transition;
   }
 
+  public void setTransition(Set<Character> transition) {
+      this.transition = transition;
+  }
+
   public boolean isAccept() {
     return accept;
   }
@@ -69,7 +77,8 @@ public class NFAState {
    * @return
    */
   public boolean acceptsChar(Character c) {
-    return transition == null && c == null || transition.contains(c);
+    return transition == null && c == null
+        || transition != null && transition.contains(c);
   }
 
   /**
@@ -86,6 +95,10 @@ public class NFAState {
    */
   public void addNext(NFAState state) {
     nextStates.add(state);
+  }
+
+  public List<NFAState> getNextStates() {
+    return nextStates;
   }
 
 }
