@@ -1,11 +1,14 @@
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 public class NFATest {
 
@@ -17,24 +20,24 @@ public class NFATest {
     NFAState start = digit.getStartState();
 
     assertFalse(start.acceptsChar('0'));
-    assert(start.next('0').get(0).isAccept());
+    assertTrue(start.next('0').get(0).isAccept());
   }
 
   @Test
   public void emptyStringAccept() {
       NFA result = new NFA(null);
 
-      assert(result.accepts(null));
+      assertNotNull(result.accepts(null));
   }
 
   @Test
   public void simpleAccept() {
       NFA result = new NFA(new HashSet<Character>(Arrays.asList(new Character[]{'a', 'b', 'c'})));
 
-      assert(result.accepts("a"));
-      assert(result.accepts("b"));
-      assertFalse(result.accepts("d"));
-      assertFalse(result.accepts(null));
+      assertNotNull(result.accepts("a"));
+      assertNotNull(result.accepts("b"));
+      assertNull(result.accepts("d"));
+      assertNull(result.accepts(null));
   }
 
     @Test
@@ -50,13 +53,13 @@ public class NFATest {
                         .build())
                 .build());
 
-        assert(result.accepts("aaa"));
-        assert(result.accepts("abc"));
-        assert(result.accepts("cba"));
-        assertFalse(result.accepts("aa"));
-        assertFalse(result.accepts("aaaa"));
-        assertFalse(result.accepts("xxxx"));
-        assertFalse(result.accepts("aaax"));
+        assertNotNull(result.accepts("aaa"));
+        assertNotNull(result.accepts("abc"));
+        assertNotNull(result.accepts("cba"));
+        assertNull(result.accepts("aa"));
+        assertNull(result.accepts("aaaa"));
+        assertNull(result.accepts("xxxx"));
+        assertNull(result.accepts("aaax"));
 
     }
 
@@ -75,13 +78,13 @@ public class NFATest {
                   .build())
           .build());
 
-        assert(result.accepts("aa"));
-        assert(result.accepts("ac"));
-        assert(result.accepts("ca"));
-        assertFalse(result.accepts("a"));
-        assertFalse(result.accepts("aaaa"));
-        assertFalse(result.accepts("xxxx"));
-        assertFalse(result.accepts("aaax"));
+        assertNotNull(result.accepts("aa"));
+        assertNotNull(result.accepts("ac"));
+        assertNotNull(result.accepts("ca"));
+        assertNull(result.accepts("a"));
+        assertNull(result.accepts("aaaa"));
+        assertNull(result.accepts("xxxx"));
+        assertNull(result.accepts("aaax"));
 
     }
 

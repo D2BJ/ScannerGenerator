@@ -131,7 +131,8 @@ public class NFA {
 
     return allStates;
   }
-  public boolean accepts(String str) {
+
+  public String accepts(String str) {
       return start.accepts(str);
   }
 
