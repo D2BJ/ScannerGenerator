@@ -20,6 +20,15 @@ public class DFA {
 	public DFA(NFA nfa) {
 		nfaToDfa(nfa);
 	}
+	public DFA() {
+	}
+	
+	public void setStart(DFAState state){
+		start = state;
+	}
+	public DFAState getStart(){
+		return start;
+	}
 	
 	/**
 	 * Takes in an NFA and converts it to a DFA
@@ -67,6 +76,9 @@ public class DFA {
 				if(nfaState.isAccept()) {
 					curr.setAccept(true);
 				}
+				if(nfaState.getIsStart()) {
+					curr.setIsStart(true);
+		        }
 			}
 			else {
 				/*
