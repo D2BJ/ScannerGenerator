@@ -143,4 +143,28 @@ public class NFA {
   	this.start = start;
     return this;
   }
+  
+  public List<NFAState> getAllStates() {
+	  List<NFAState> allStates = new ArrayList<NFAState>();
+	  
+	  Set<NFAState> discovered = new HashSet<NFAState>();
+	  Stack<NFAState> nextStatesToExplore = new Stack<NFAState>();
+	  NFAState temp;
+	  
+	  while(!nextStatesToExplore.empty()) {
+		  temp = nextStatesToExplore.pop();
+		  allStates.add(temp);
+		  
+		  for(NFAState nextState : temp.getNextStates()) {
+			  if((!nextStatesToExplore.contains(nextState))
+				  && (!discovered.contains(nextState))) {
+				  nextStatesToExplore.push(nextState);
+			  }
+		  }
+		  
+		  discovered.add(temp);
+	  }
+	  
+	  return allStates;
+  }
 }
