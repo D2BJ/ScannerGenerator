@@ -1,14 +1,15 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 public class NonTerminal {
 	
-	String text = "";
-	String[] contents;
-
-	List<NonTerminal> firstSet = new ArrayList<NonTerminal>();
-	List<NonTerminal> followSet = new ArrayList<NonTerminal>();
+	private String text = "";
+	private List<String> contents = new ArrayList<String>();
+	
+	Set<NonTerminal> firstSet = new HashSet<NonTerminal>();
+	Set<NonTerminal> followSet = new HashSet<NonTerminal>();
 	
 	public NonTerminal() {}
 	
@@ -28,12 +29,24 @@ public class NonTerminal {
 		return getText();
 	}
 	
-	public String[] getContents() {
+	public List<String> getContents() {
 		return contents;
 	}
 
-	public void setContents(String[] contents) {
+	public void setContents(List<String> contents) {
 		this.contents = contents;
+	}
+	
+	public void setContents(String[] contentList) {
+		contents = new ArrayList();
+		
+		for(String content : contentList) {
+			contents.add(content);
+		}
+	}
+	
+	public void removeFromContents(String content) {
+		contents.remove(content); //test
 	}
 	
 	public void addToText(char c) {

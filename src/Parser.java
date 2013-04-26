@@ -1,18 +1,18 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import java.util.Set;
 
 public class Parser {
 	
-	List<Terminal> terminals = new ArrayList<Terminal>();
-	List<NonTerminal> nonTerminals = new ArrayList<NonTerminal>();
+	Set<Terminal> terminals = new HashSet<Terminal>();
+	Set<NonTerminal> nonTerminals = new HashSet<NonTerminal>();
+	Set<Identifier> identifiers = new HashSet<Identifier>();
 	
-	private int contentOffset = 6;
+	List<String> terminalsAndIds = new ArrayList<String>();
 	
 	public Parser() {
 		File inFile = new File("grammar.txt");
@@ -33,15 +33,45 @@ public class Parser {
 				
 				String secondHalf = String.valueOf(chars).split("::=")[1];
 				nt.setContents(secondHalf.split("\\|"));
+				
+				for(String content : nt.getContents()) {
+					String[] temp = content.split(" ");
+					for(String termOrId : temp) {
+						if(!termOrId.contains("<") && (termOrId.length() > 0)) {
+							terminalsAndIds.add(termOrId);
+						}
+					}
+				}
+				
+				for(String element : terminalsAndIds) {
+					if(element.matches(".*[A-Z]+.*")) {
+						identifiers.add(new Identifier(element));
+					}
+					else {
+						terminals.add(new Terminal(element));
+					}
+				}
+				
+				for(Identifier id : identifiers) {
+					System.out.println(id.getText());
+				}
+				
+				/*for(Terminal t : terminals) {
+					System.out.println(t.getText());
+				}*/
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		
-		for(NonTerminal non : nonTerminals) {
+		/*for(NonTerminal non : nonTerminals) {
 			for(String s : non.getContents())
 				System.out.println(s);
-		}
+		}*/
+		
+		/*for(String element : terminalsAndIds) {
+			System.out.println(element);
+		}*/
 	}
 	
 	public boolean nonTerminalsContains(NonTerminal nt) {
