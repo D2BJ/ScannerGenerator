@@ -12,6 +12,8 @@ public class Parser {
 	List<Terminal> terminals = new ArrayList<Terminal>();
 	List<NonTerminal> nonTerminals = new ArrayList<NonTerminal>();
 	
+	private int contentOffset = 6;
+	
 	public Parser() {
 		File inFile = new File("grammar.txt");
 		
@@ -21,34 +23,34 @@ public class Parser {
 			while(in.hasNextLine()) {
 				String s = in.nextLine();
 				char[] chars = s.toCharArray();
-				
-				for(int i = 0; i < chars.length; i++) {
-					if(chars[i] == '<') {
-						NonTerminal nt = new NonTerminal();
-						while(chars[i] != '>') {
-							nt.addToText(chars[i++]);
-						}
-						nt.addToText('>');
-						System.out.println(nt.toString());
-					}
+				NonTerminal nt = new NonTerminal();
+				int i = 0;
+				while(chars[i] != '>') {
+					nt.addToText(chars[i++]);
 				}
+				nt.addToText('>');
+				nonTerminals.add(nt);
 				
-				/*Pattern tokenPattern = Pattern.compile("\\<(.+?)\\>");
-				Matcher m = tokenPattern.matcher(s);
-				if(m.matches()) {
-					NonTerminal nt = new NonTerminal(m.group());
-					nonTerminals.add(nt);
-				} else {
-					System.out.println("bills suck");
-					continue;
-				}*/
+				String secondHalf = String.valueOf(chars).split("::=")[1];
+				nt.setContents(secondHalf.split("\\|"));
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		
-		/*for(NonTerminal non : nonTerminals)
-			System.out.println(non.toString());*/
+		for(NonTerminal non : nonTerminals) {
+			for(String s : non.getContents())
+				System.out.println(s);
+		}
+	}
+	
+	public boolean nonTerminalsContains(NonTerminal nt) {
+		for(NonTerminal n : nonTerminals) {
+			if(n.getText().equals(nt.getText()))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	public static void main(String[] args) {

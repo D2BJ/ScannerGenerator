@@ -5,7 +5,8 @@ import java.util.List;
 public class NonTerminal {
 	
 	String text = "";
-	
+	String[] contents;
+
 	List<NonTerminal> firstSet = new ArrayList<NonTerminal>();
 	List<NonTerminal> followSet = new ArrayList<NonTerminal>();
 	
@@ -25,6 +26,14 @@ public class NonTerminal {
 
 	public String toString() {
 		return getText();
+	}
+	
+	public String[] getContents() {
+		return contents;
+	}
+
+	public void setContents(String[] contents) {
+		this.contents = contents;
 	}
 	
 	public void addToText(char c) {
