@@ -1,7 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -258,9 +261,54 @@ public class Parser {
   }
 	
 	public ParsingTable buildTable(){
+		tokens.add(new Token("$"));
 		ParsingTable table = new ParsingTable(tokens.size(),nonTerminals.size(),tokens,nonTerminals);
+		for(NonTerminal nt : nonTerminals){
+			for(Rule r : nt.getRules()){
+				Symbol s =r.getRule().get(0);
+				if(s instanceof Token){
+					table.addEntry(nt,(Token) s, new ProductionRule(nt,r.getRule()));
+				}
+				else if(s instanceof NonTerminal){
+					NonTerminal temp = null;
+					for(NonTerminal N : nonTerminals){
+						if(N.getText().equals(s.getText())){
+							temp = N;
+						}
+					}
+					for(Token t : temp.getFirstSet()){
+						if(r.getRule() !=  null)
+							table.addEntry(nt, t, new ProductionRule(nt,r.getRule()));
+					}
+				}
+			}
+		}
+		
 		return table;
 	}
+	
+	/*public HashMap<ProductionRule, ArrayList<Token>> computePredictSet() {
+        HashMap<ProductionRule, ArrayList<Token>> predictSetsLocal = new HashMap<ProductionRule, ArrayList<Token>>();
+        for (ProductionRule P : productionRules) {
+            ArrayList<Token> temp = new ArrayList<Token>();
+            
+            NonTerminal A = P.getN();
+            Set<NonTerminal> alpha = (Set<NonTerminal>) A;
+            ArrayList<Token> first = createFirstSets(alpha).getFirstSet();
+            for (Token T : first)
+                temp.add(T);
+            
+            if (first.contains(new Token("<epsilon>"))) {
+                for (Token T : followSets.get(A))
+                    temp.add(T);
+            }
+            
+            predictSetsLocal.put(P, temp);
+        }
+        
+        return predictSetsLocal;
+    }*/
+	
 	public static void main(String[] args) {
 		Parser p = new Parser();
 	}

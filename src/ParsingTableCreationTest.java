@@ -252,17 +252,17 @@ public class ParsingTableCreationTest {
 		for(Token t : p.tokens)
 			System.out.print(t.getText()+" ");
 		*/
-		/*
-		for(ProductionRule pr : myParser.productionRules)
+		
+		/*for(ProductionRule pr : myParser.productionRules)
 			System.out.print(pr.getN().getText() + " ");
 		System.out.print("\n");
 		for(ProductionRule pr : p.productionRules)
-			System.out.print(pr.getN().getText() + " ");
-		*/
+			System.out.print(pr.getN().getText() + " ");*/
 		
-		ParsingTable myTable = myParser.buildTable();//makes an LL1 table
+		
+		ParsingTable myTable = p.buildTable();//makes an LL1 table
 		List<NonTerminal> nt = new ArrayList<NonTerminal>(myParser.nonTerminals);
-		myTable.addEntry(nt.get(0), myParser.tokens.get(0), myParser.productionRules.get(0));//adds entry to the table just to see if it worked
+		//myTable.addEntry(nt.get(0), myParser.tokens.get(0), myParser.productionRules.get(0));//adds entry to the table just to see if it worked
 		myTable.printTable();//prints the table in a table format
 		
 		assertEquals(p.nonTerminals.size(),myParser.nonTerminals.size());//checks if the size of both parsers nonterminal lists

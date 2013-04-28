@@ -26,5 +26,8 @@ public class ProductionRule {
 	public void setRule(ArrayList<Symbol> rule) {
 		this.rule = rule;
 	}
+	public String toString(){
+		return(N.getText() + "-->" + rule.toString());
+	}
 
 }
