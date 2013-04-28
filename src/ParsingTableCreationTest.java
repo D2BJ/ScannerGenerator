@@ -12,9 +12,12 @@ import org.junit.Test;
 public class ParsingTableCreationTest {
 	
 	public List<Token> buildNonTerminalList(){
+		//create token list
 		List<Token> tokens = new ArrayList<Token>();
 		
+		//creates a new Terminal and sets the text to the first sample grammar text
 		Terminal one = new Terminal("begin");
+		//adds the terminal to the token list
 		tokens.add(one);
 		
 		Terminal two = new Terminal("end");
@@ -71,6 +74,7 @@ public class ParsingTableCreationTest {
 		Terminal twenty = new Terminal("print");
 		tokens.add(twenty);
 		
+		//adds the identifiers to the token list from the grammar text
 		Identifier a = new Identifier("REGEX");
 		tokens.add(a);
 		
@@ -86,6 +90,7 @@ public class ParsingTableCreationTest {
 	public Set<NonTerminal> buildNonTerminalSet(){
 		Set<NonTerminal> nt = new HashSet<NonTerminal>();
 		
+		//makes the new NonTerminal sets its text and adds its rules
 		NonTerminal one = new NonTerminal("<MiniRE-program>");
 		String[] st = new String[]{"begin","<statement-list>","end"};
 		Rule r = new Rule(st);
@@ -218,6 +223,8 @@ public class ParsingTableCreationTest {
 	public List<ProductionRule> buildProductionRuleList(Set<NonTerminal> nt){
 		List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
 		
+		//goes through all nonterminals from the list and makes a ProductionRule based on the
+		//NonTerminal rules and links the NonTermianl
 		for(NonTerminal t : nt){
 			for(Rule r : t.getRules()){
 				ProductionRule p = new ProductionRule(t,r.getRule());
@@ -231,12 +238,12 @@ public class ParsingTableCreationTest {
 	
 	@Test
 	public void numberOfStatesShouldBeEqual() {
-		Set<NonTerminal> nonTerminals = buildNonTerminalSet();
-		List<Token> tokens = buildNonTerminalList();
-		List<ProductionRule> productionRules = buildProductionRuleList(nonTerminals);
+		Set<NonTerminal> nonTerminals = buildNonTerminalSet();//makes the Nonterminal List an populates
+		List<Token> tokens = buildNonTerminalList();//token list created and populates
+		List<ProductionRule> productionRules = buildProductionRuleList(nonTerminals);//production takes in the nonterminal list
 		
-		Parser myParser = new Parser(nonTerminals,tokens,productionRules);		
-		Parser p = new Parser();
+		Parser myParser = new Parser(nonTerminals,tokens,productionRules);//creates new parser from hard coded data		
+		Parser p = new Parser(); //makes the parser from the grammar text file based on the parser code
 		
 		/*
 		for(Token t : myParser.tokens)
@@ -253,13 +260,13 @@ public class ParsingTableCreationTest {
 			System.out.print(pr.getN().getText() + " ");
 		*/
 		
-		//ParsingTable myTable = myParser.buildTable();
-		//List<NonTerminal> nt = new ArrayList<NonTerminal>(myParser.nonTerminals);
-		//myTable.addEntry(nt.get(0), myParser.tokens.get(0), myParser.productionRules.get(0));
-		//myTable.printTable();
+		ParsingTable myTable = myParser.buildTable();//makes an LL1 table
+		List<NonTerminal> nt = new ArrayList<NonTerminal>(myParser.nonTerminals);
+		myTable.addEntry(nt.get(0), myParser.tokens.get(0), myParser.productionRules.get(0));//adds entry to the table just to see if it worked
+		myTable.printTable();//prints the table in a table format
 		
-		assertEquals(p.nonTerminals.size(),myParser.nonTerminals.size());
-		assertEquals(p.productionRules.size(),myParser.productionRules.size());
+		assertEquals(p.nonTerminals.size(),myParser.nonTerminals.size());//checks if the size of both parsers nonterminal lists
+		assertEquals(p.productionRules.size(),myParser.productionRules.size());//same with token list
 		//assertEquals(p.tokens.size(),myParser.tokens.size());
 	}
 
