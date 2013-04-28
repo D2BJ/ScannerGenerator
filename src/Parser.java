@@ -16,6 +16,13 @@ public class Parser {
 	
 	Set<NonTerminal> nonTerminals = new HashSet<NonTerminal>();
 	List<Token> tokens = new ArrayList<Token>();
+	List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
+	
+	public Parser(Set<NonTerminal> nonTerminals,List<Token> tokens,List<ProductionRule> productionRules){
+		this.nonTerminals = nonTerminals;
+		this.tokens = tokens;
+		this.productionRules = productionRules;
+	}
 	
 	public Parser() {
 		File inFile = new File("grammar.txt");
@@ -96,6 +103,7 @@ public class Parser {
 	 */
 	public void tokenizeRules(NonTerminal nt) {
 		for(Rule r : nt.getRules()) {
+			productionRules.add(new ProductionRule(nt,r.getRule()));
 			for(Symbol sym : r.getRule()) {
 				if(!sym.getText().contains("<") && (sym.getText().length() > 0)) {
 					int i = 0;
@@ -115,6 +123,10 @@ public class Parser {
 		}
 	}
 	
+	public ParsingTable buildTable(){
+		ParsingTable table = new ParsingTable(tokens.size(),nonTerminals.size(),tokens,nonTerminals);
+		return table;
+	}
 	public static void main(String[] args) {
 		Parser p = new Parser();
 	}
