@@ -1,24 +1,29 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+<<<<<<< HEAD
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+=======
+import java.util.LinkedHashSet;
+>>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
 /**
- * Reads a grammar and pulls out a list of nonterminals. The nonterminals keep 
+ * Reads a grammar and pulls out a list of nonterminals. The nonterminals keep
  * hold a list of rules that they are associated with.
- * 
+ *
  * @author dgreenhalgh
  */
 public class Parser {
-	
-	Set<NonTerminal> nonTerminals = new HashSet<NonTerminal>();
+
+	Set<NonTerminal> nonTerminals = new LinkedHashSet<NonTerminal>();
 	List<Token> tokens = new ArrayList<Token>();
+<<<<<<< HEAD
 	List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
 	
 	public Parser(Set<NonTerminal> nonTerminals,List<Token> tokens,List<ProductionRule> productionRules){
@@ -27,12 +32,15 @@ public class Parser {
 		this.productionRules = productionRules;
 	}
 	
+=======
+
+>>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
 	public Parser() {
 		File inFile = new File("grammar.txt");
-		
+
 		try {
 			Scanner in = new Scanner(inFile);
-			
+
 			while(in.hasNextLine()) {
 				String s = in.nextLine();
 
@@ -62,23 +70,23 @@ public class Parser {
 
     createFirstSets(nonTerminals);
 	}
-	
+
 	/**
 	 * Parses the string and creates a nonterminal out of the contents
-	 * 
+	 *
 	 * @param s Next line in grammar
 	 * @return nt The nonterminal on line s
 	 */
 	public NonTerminal parseLine(String s) {
 		NonTerminal nt = new NonTerminal();
-		
+
 		String[] ruleDivided = s.split("::=");
 		nt.setText(ruleDivided[0].trim());
 		for(String ruleStr : ruleDivided[1].split("\\|")) {
       String[] ruleToken = tokenizeRule(ruleStr.trim());
       nt.addRule(new Rule(ruleToken));
 		}
-		
+
 		return nt;
 	}
 
@@ -152,7 +160,7 @@ public class Parser {
               contains = true;
             }
 					}
-					
+
 					if(!contains) {
 						tokens.add((Token) sym);
           }
@@ -259,6 +267,7 @@ public class Parser {
       }
     }
   }
+<<<<<<< HEAD
 	
 	public ParsingTable buildTable(){
 		tokens.add(new Token("$"));
@@ -267,7 +276,13 @@ public class Parser {
 			for(Rule r : nt.getRules()){
 				Symbol s =r.getRule().get(0);
 				if(s instanceof Token){
-					table.addEntry(nt,(Token) s, new ProductionRule(nt,r.getRule()));
+					if(s.getText() == "<epsilon>"){
+						for(Token t : nt.getFollowSet()){
+							table.addEntry(nt,(Token) t, new ProductionRule(nt,r.getRule()));
+						}
+					}
+					else
+						table.addEntry(nt,(Token) s, new ProductionRule(nt,r.getRule()));
 				}
 				else if(s instanceof NonTerminal){
 					NonTerminal temp = null;
@@ -309,7 +324,34 @@ public class Parser {
         return predictSetsLocal;
     }*/
 	
+=======
+
+
+  public static void createFollowSet(Set<NonTerminal> nonTerminals) {
+    NonTerminal start = nonTerminals.iterator().next();
+    start.addToFollowSet(new Token("$"));
+    boolean changed = false;
+    do {
+	    for (NonTerminal nt : nonTerminals) {
+
+	    }
+
+    } while (changed);
+  }
+>>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
 	public static void main(String[] args) {
 		Parser p = new Parser();
+
+		for (NonTerminal nt : p.nonTerminals) {
+		  System.out.println(nt);
+		}
+
+		for (NonTerminal nt : p.nonTerminals) {
+		  System.out.printf("First(%s) = %s\n", nt.getText(), nt.firstSet.toString());
+		}
+		System.out.println();
+		for (NonTerminal nt : p.nonTerminals) {
+		  System.out.printf("Follow(%s) = %s\n", nt.getText(), nt.followSet.toString());
+		}
 	}
 }
