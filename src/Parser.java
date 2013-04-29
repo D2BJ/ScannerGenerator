@@ -1,8 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -48,7 +51,6 @@ public class Parser {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-
 
     createFirstSets(nonTerminals);
 	}
@@ -247,16 +249,67 @@ public class Parser {
         }
       }
     }
+    createFollowSet(nonterminals);
   }
 
 
   public static void createFollowSet(Set<NonTerminal> nonTerminals) {
+    Map<String, NonTerminal> nonTerminalMap = new HashMap<String, NonTerminal>();
+    for (NonTerminal nt : nonTerminals) {
+      nonTerminalMap.put(nt.getText(), nt);
+    }
+
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
     boolean changed = false;
     do {
-	    for (NonTerminal nt : nonTerminals) {
-
+      changed = false;
+	    for (NonTerminal a : nonTerminals) {
+	      for (Rule r : a.getRules()) {
+	        List<Symbol> xs = r.getRule();
+	        for (int i = 0; i < xs.size(); i++) {
+	          String xiName = xs.get(i).getText();
+	          if (nonTerminalMap.containsKey(xiName)) {
+	            Set<Token> newStuff = new HashSet<Token>();
+	            for (int j = i + 1; j < xs.size(); j++) {
+	              String xj = xs.get(j).getText();
+	              if (nonTerminalMap.containsKey(xj)) {
+	                newStuff.addAll(nonTerminalMap.get(xj).getFirstSet());
+	              } else {
+	                newStuff.add(new Token(xj));
+	              }
+	            }
+	            // dumb. shouldn't have to do this
+	            boolean hasEpsilon = false;
+	            Token remove = null;
+	            for (Token t : newStuff) {
+	              if (t.getText().equals("<epsilon>")) {
+	                hasEpsilon = true;
+	                remove = t;
+	                break;
+	              }
+	            }
+	            newStuff.remove(remove);
+	            NonTerminal xi = nonTerminalMap.get(xiName);
+	            // are you kidding me?
+	            if (i == xs.size() - 1) {
+	                xi.followSet.addAll(a.followSet);
+	            }
+	            int oldSize = xi.followSet.size();
+	            xi.followSet.addAll(newStuff);
+	            if (xi.followSet.size() > oldSize) {
+	              changed = true;
+	            }
+	            oldSize = xi.followSet.size();
+	            if (hasEpsilon) {
+	              xi.followSet.addAll(a.followSet);
+	              if (xi.followSet.size() > oldSize) {
+	                changed = true;
+	              }
+	            }
+	          }
+	        }
+	      }
 	    }
 
     } while (changed);
@@ -265,8 +318,9 @@ public class Parser {
 		Parser p = new Parser();
 
 		for (NonTerminal nt : p.nonTerminals) {
-		  System.out.println(nt);
+		  System.out.println(nt + " -> " + nt.getRules());
 		}
+		System.out.println();
 
 		for (NonTerminal nt : p.nonTerminals) {
 		  System.out.printf("First(%s) = %s\n", nt.getText(), nt.firstSet.toString());
