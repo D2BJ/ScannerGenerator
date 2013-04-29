@@ -30,28 +30,9 @@ public class Parser {
 		this.productionRules = productionRules;
 	}
 
-	public Parser() {
-		idMap.put("BEGIN", new Token("begin"));
-		idMap.put("END", new Token("end"));
-		idMap.put("REPLACE", new Token("replace"));
-		idMap.put("WITH", new Token("with"));
-		idMap.put("IN", new Token("in"));
-		idMap.put("SEMICOLON", new Token(";"));
-		idMap.put("RECREP", new Token("recursivereplace"));
-		idMap.put("EQ", new Token("="));
-		idMap.put("HASH", new Token("#"));
-		idMap.put("MAXFREQ", new Token("maxfreqstring"));
-		idMap.put("OPENPARENS", new Token("("));
-		idMap.put("CLOSEPARENS", new Token(")"));
-		idMap.put("GRTNOT", new Token(">!"));
-		idMap.put("PRINT", new Token("print"));
-		idMap.put("COMMA", new Token(","));
-		idMap.put("FIND", new Token("find"));
-		idMap.put("DIFF", new Token("diff"));
-		idMap.put("UNION", new Token("union"));
-		idMap.put("INTERS", new Token("inters"));
-		File inFile = new File("grammar.txt");
-	  ScannerGenerator.create("token_spec.txt", "script.txt");
+	public Parser(String grammarFile, String specFile, String scriptFile) {
+		File inFile = new File(grammarFile);
+	  ScannerGenerator.create(specFile, scriptFile);
 		try {
 			Scanner in = new Scanner(inFile);
 
@@ -82,6 +63,12 @@ public class Parser {
 		}
 
     createFirstSets(nonTerminals);
+    for (Token t : tokens) {
+      int tokloc = ScannerGenerator.tokens.indexOf(t.getText());
+      if (tokloc != -1) {
+        idMap.put(ScannerGenerator.ids.get(tokloc), t);
+      }
+    }
 	}
 
 	/**
@@ -425,13 +412,15 @@ public class Parser {
         }
       }
 
-
     }
   }
 
 	public static void main(String[] args) {
-
-		Parser p = new Parser();
+	  if (args.length < 3) {
+	    System.err.println("Improper arguments. Usage <grammar-file> <spec-file> <script-file>");
+	    System.exit(1);
+	  }
+		Parser p = new Parser(args[0], args[1], args[2]);
 		p.walkTable();
 
 
