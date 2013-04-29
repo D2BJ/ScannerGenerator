@@ -389,7 +389,13 @@ public class Parser {
       if (parseTop instanceof NonTerminal) {
         NonTerminal ptnt = (NonTerminal) parseTop;
         System.out.printf("Indexing at: [%s][%s]\n", ptnt.toString(), inputTop.toString());
-        ProductionRule pr = pt.get(ptnt, inputTop);
+        ProductionRule pr = null;
+        try {
+          pr = pt.get(ptnt, inputTop);
+        } catch (Exception e) {
+          System.out.println("Error while parsing: "+inputTop.toString());
+          return false;
+        }
         parsingStack.pop();
         List<Symbol> rules = pr.getRule();
         for (int i = rules.size() - 1; i >= 0; i--) {
