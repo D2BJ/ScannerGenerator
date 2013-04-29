@@ -2,6 +2,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -236,37 +237,76 @@ public class ParsingTableCreationTest {
 		return productionRules;
 	}
 	
+	public Set<NonTerminal> buildNonTerminalSet2(){
+		
+        NonTerminal aNonTerm = new NonTerminal("<stmt-sequence>");
+        Rule aRule = new Rule(new String[]{"<stmt>","<stmt-seq'>"});
+        Set<Token> follow = new HashSet<Token>();
+        follow.add(new Token("$"));
+        aNonTerm.setFollowSet(follow);
+        aNonTerm.addRule(aRule);
+
+        NonTerminal bNonTerm = new NonTerminal("<stmt-seq'>");
+        Rule bRule = new Rule(new String[]{";","<stmt-sequence>"});
+        Rule bRuleTwo = new Rule(new String[]{"<epsilon>"});
+        bNonTerm.addRule(bRule);
+        bNonTerm.setFollowSet(follow);
+        bNonTerm.addRule(bRuleTwo);
+
+        NonTerminal cNonTerm = new NonTerminal("<stmt>");
+        Rule cRule = new Rule(new String[]{"s"});
+        follow.add(new Token(";"));
+        cNonTerm.setFollowSet(follow);
+        cNonTerm.addRule(cRule);
+
+        Set<NonTerminal> grammar = new LinkedHashSet<NonTerminal>();
+        grammar.add(aNonTerm);
+        grammar.add(bNonTerm);
+        grammar.add(cNonTerm);
+        
+        return grammar;
+	}
+	
+	public List<Token> buildTokenList(){
+		List<Token> tokens = new ArrayList<Token>();
+		
+		//creates a new Terminal and sets the text to the first sample grammar text
+		Terminal one = new Terminal(";");
+		//adds the terminal to the token list
+		tokens.add(one);
+		
+		Terminal three = new Terminal("s");
+		//adds the terminal to the token list
+		tokens.add(three);
+		
+		return tokens;
+	}
 	@Test
 	public void numberOfStatesShouldBeEqual() {
-		Set<NonTerminal> nonTerminals = buildNonTerminalSet();//makes the Nonterminal List an populates
-		List<Token> tokens = buildNonTerminalList();//token list created and populates
-		List<ProductionRule> productionRules = buildProductionRuleList(nonTerminals);//production takes in the nonterminal list
+		//Set<NonTerminal> nonTerminals = buildNonTerminalSet();//makes the Nonterminal List an populates
+		//List<Token> tokens = buildNonTerminalList();//token list created and populates
+		//List<ProductionRule> productionRules = buildProductionRuleList(nonTerminals);//production takes in the nonterminal list
 		
-		Parser myParser = new Parser(nonTerminals,tokens,productionRules);//creates new parser from hard coded data		
-		Parser p = new Parser(); //makes the parser from the grammar text file based on the parser code
+		Set<NonTerminal> nonTerminals2 = buildNonTerminalSet2();//makes the Nonterminal List an populates
+		List<Token> tokens2 = buildTokenList();//token list created and populates
+		List<ProductionRule> productionRules2 = buildProductionRuleList(nonTerminals2);//production takes in the nonterminal list
 		
-		/*
-		for(Token t : myParser.tokens)
-			System.out.print(t.getText()+" ");
-		System.out.print("\n");
-		for(Token t : p.tokens)
-			System.out.print(t.getText()+" ");
-		*/
+		//Parser myParser = new Parser(nonTerminals,tokens,productionRules);//creates new parser from hard coded data		
+		//Parser p = new Parser(); //makes the parser from the grammar text file based on the parser code
 		
-		/*for(ProductionRule pr : myParser.productionRules)
-			System.out.print(pr.getN().getText() + " ");
-		System.out.print("\n");
-		for(ProductionRule pr : p.productionRules)
-			System.out.print(pr.getN().getText() + " ");*/
+		Parser myParser2 = new Parser(nonTerminals2,tokens2,productionRules2);
+		myParser2.createFirstSets(nonTerminals2);		
+		ParsingTable myTable2 = myParser2.buildTable();//makes an LL1 table
 		
+		myTable2.printTable();
 		
-		ParsingTable myTable = p.buildTable();//makes an LL1 table
-		List<NonTerminal> nt = new ArrayList<NonTerminal>(myParser.nonTerminals);
+		//ParsingTable myTable = p.buildTable();//makes an LL1 table
+		//List<NonTerminal> nt = new ArrayList<NonTerminal>(myParser.nonTerminals);
 		//myTable.addEntry(nt.get(0), myParser.tokens.get(0), myParser.productionRules.get(0));//adds entry to the table just to see if it worked
-		myTable.printTable();//prints the table in a table format
+		//myTable.printTable();//prints the table in a table format
 		
-		assertEquals(p.nonTerminals.size(),myParser.nonTerminals.size());//checks if the size of both parsers nonterminal lists
-		assertEquals(p.productionRules.size(),myParser.productionRules.size());//same with token list
+		//assertEquals(p.nonTerminals.size(),myParser.nonTerminals.size());//checks if the size of both parsers nonterminal lists
+		//assertEquals(p.productionRules.size(),myParser.productionRules.size());//same with token list
 		//assertEquals(p.tokens.size(),myParser.tokens.size());
 	}
 

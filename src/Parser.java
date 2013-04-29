@@ -1,14 +1,11 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-<<<<<<< HEAD
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-=======
 import java.util.LinkedHashSet;
->>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
@@ -23,7 +20,7 @@ public class Parser {
 
 	Set<NonTerminal> nonTerminals = new LinkedHashSet<NonTerminal>();
 	List<Token> tokens = new ArrayList<Token>();
-<<<<<<< HEAD
+
 	List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
 	
 	public Parser(Set<NonTerminal> nonTerminals,List<Token> tokens,List<ProductionRule> productionRules){
@@ -31,10 +28,9 @@ public class Parser {
 		this.tokens = tokens;
 		this.productionRules = productionRules;
 	}
-	
-=======
 
->>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
+
+
 	public Parser() {
 		File inFile = new File("grammar.txt");
 
@@ -267,7 +263,7 @@ public class Parser {
       }
     }
   }
-<<<<<<< HEAD
+
 	
 	public ParsingTable buildTable(){
 		tokens.add(new Token("$"));
@@ -302,31 +298,6 @@ public class Parser {
 		return table;
 	}
 	
-	/*public HashMap<ProductionRule, ArrayList<Token>> computePredictSet() {
-        HashMap<ProductionRule, ArrayList<Token>> predictSetsLocal = new HashMap<ProductionRule, ArrayList<Token>>();
-        for (ProductionRule P : productionRules) {
-            ArrayList<Token> temp = new ArrayList<Token>();
-            
-            NonTerminal A = P.getN();
-            Set<NonTerminal> alpha = (Set<NonTerminal>) A;
-            ArrayList<Token> first = createFirstSets(alpha).getFirstSet();
-            for (Token T : first)
-                temp.add(T);
-            
-            if (first.contains(new Token("<epsilon>"))) {
-                for (Token T : followSets.get(A))
-                    temp.add(T);
-            }
-            
-            predictSetsLocal.put(P, temp);
-        }
-        
-        return predictSetsLocal;
-    }*/
-	
-=======
-
-
   public static void createFollowSet(Set<NonTerminal> nonTerminals) {
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
@@ -338,7 +309,7 @@ public class Parser {
 
     } while (changed);
   }
->>>>>>> 0b0c0496199e4534d700015ffd9cf55c8a1cfd17
+
 	public static void main(String[] args) {
 		Parser p = new Parser();
 
