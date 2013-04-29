@@ -22,6 +22,10 @@ public class Symbol {
 	}
 
 	@Override
+	public int hashCode() {
+	  return text.hashCode();
+	}
+	@Override
 	public boolean equals(Object o) {
 	  Symbol s = (Symbol)o;
 	  return s.text.equals(text);

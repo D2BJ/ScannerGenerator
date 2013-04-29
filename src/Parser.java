@@ -262,6 +262,7 @@ public class Parser {
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
     boolean changed = false;
+    int d = 0;
     do {
       changed = false;
 	    for (NonTerminal a : nonTerminals) {
@@ -279,17 +280,7 @@ public class Parser {
 	                newStuff.add(new Token(xj));
 	              }
 	            }
-	            // dumb. shouldn't have to do this
-	            boolean hasEpsilon = false;
-	            Token remove = null;
-	            for (Token t : newStuff) {
-	              if (t.getText().equals("<epsilon>")) {
-	                hasEpsilon = true;
-	                remove = t;
-	                break;
-	              }
-	            }
-	            newStuff.remove(remove);
+	            boolean hasEpsilon = newStuff.remove(new Token("<epsilon>"));
 	            NonTerminal xi = nonTerminalMap.get(xiName);
 	            if (i == xs.size() - 1) {
 	                xi.followSet.addAll(a.followSet);

@@ -13,11 +13,6 @@ public class Token extends Symbol{
 	}
 
 	@Override
-  public boolean equals(Object o) {
-	  Token s = (Token)o;
-	  return s.getText().equals(getText());
-	}
-	@Override
   public String toString() {
 		return super.toString();
 	}
