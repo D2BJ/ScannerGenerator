@@ -52,6 +52,7 @@ public class NonTerminal extends Symbol {
   public boolean addAllToFirstSet(Set<Token> tokens) {
     return firstSet.addAll(tokens);
   }
+
   public boolean addToFollowSet(Token token) {
     return followSet.add(token);
   }
@@ -60,6 +61,15 @@ public class NonTerminal extends Symbol {
     return followSet.addAll(tokens);
   }
 
+
+  
+	public Set<Token> getFollowSet() {
+		return followSet;
+	}
+
+	public void setFollowSet(Set<Token> followSet) {
+		this.followSet = followSet;
+	}
 
 
 	@Override
