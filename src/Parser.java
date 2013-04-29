@@ -291,7 +291,6 @@ public class Parser {
 	            }
 	            newStuff.remove(remove);
 	            NonTerminal xi = nonTerminalMap.get(xiName);
-	            // are you kidding me?
 	            if (i == xs.size() - 1) {
 	                xi.followSet.addAll(a.followSet);
 	            }
