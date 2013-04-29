@@ -312,7 +312,6 @@ public class Parser {
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
     boolean changed = false;
-    int d = 0;
     do {
       changed = false;
 	    for (NonTerminal a : nonTerminals) {
@@ -427,6 +426,18 @@ public class Parser {
 	    System.exit(1);
 	  }
 		Parser p = new Parser(args[0], args[1], args[2]);
+
+		for (NonTerminal nt : p.nonTerminals) {
+		  String fs = nt.firstSet.toString();
+		  System.out.printf("First(%s) = {%s}\n", nt.getText(), fs.substring(1, fs.length() - 1));
+		}
+		System.out.println();
+		for (NonTerminal nt : p.nonTerminals) {
+		  String fls = nt.followSet.toString();
+		  System.out.printf("Follow(%s) = {%s}\n", nt.getText(), fls.substring(1, fls.length() - 1));
+		}
+		System.out.println();
+
 		p.walkTable();
 
 
