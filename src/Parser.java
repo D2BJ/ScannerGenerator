@@ -1,6 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -16,6 +20,16 @@ public class Parser {
 
 	Set<NonTerminal> nonTerminals = new LinkedHashSet<NonTerminal>();
 	List<Token> tokens = new ArrayList<Token>();
+
+	List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
+	
+	public Parser(Set<NonTerminal> nonTerminals,List<Token> tokens,List<ProductionRule> productionRules){
+		this.nonTerminals = nonTerminals;
+		this.tokens = tokens;
+		this.productionRules = productionRules;
+	}
+
+
 
 	public Parser() {
 		File inFile = new File("grammar.txt");
@@ -133,6 +147,7 @@ public class Parser {
 	 */
 	public void tokenizeRules(NonTerminal nt) {
 		for(Rule r : nt.getRules()) {
+			productionRules.add(new ProductionRule(nt,r.getRule()));
 			for(Symbol sym : r.getRule()) {
 				if(!sym.getText().contains("<") && (sym.getText().length() > 0)) {
 					boolean contains = false;
@@ -249,7 +264,40 @@ public class Parser {
     }
   }
 
-
+	
+	public ParsingTable buildTable(){
+		tokens.add(new Token("$"));
+		ParsingTable table = new ParsingTable(tokens.size(),nonTerminals.size(),tokens,nonTerminals);
+		for(NonTerminal nt : nonTerminals){
+			for(Rule r : nt.getRules()){
+				Symbol s =r.getRule().get(0);
+				if(s instanceof Token){
+					if(s.getText() == "<epsilon>"){
+						for(Token t : nt.getFollowSet()){
+							table.addEntry(nt,(Token) t, new ProductionRule(nt,r.getRule()));
+						}
+					}
+					else
+						table.addEntry(nt,(Token) s, new ProductionRule(nt,r.getRule()));
+				}
+				else if(s instanceof NonTerminal){
+					NonTerminal temp = null;
+					for(NonTerminal N : nonTerminals){
+						if(N.getText().equals(s.getText())){
+							temp = N;
+						}
+					}
+					for(Token t : temp.getFirstSet()){
+						if(r.getRule() !=  null)
+							table.addEntry(nt, t, new ProductionRule(nt,r.getRule()));
+					}
+				}
+			}
+		}
+		
+		return table;
+	}
+	
   public static void createFollowSet(Set<NonTerminal> nonTerminals) {
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
@@ -261,6 +309,7 @@ public class Parser {
 
     } while (changed);
   }
+
 	public static void main(String[] args) {
 		Parser p = new Parser();
 
