@@ -1,4 +1,4 @@
-ScannerGenerator
+Parser
 ================
 In order to run this run the following commands.
 
