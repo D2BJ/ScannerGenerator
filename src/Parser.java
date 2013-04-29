@@ -1,14 +1,14 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * Reads a grammar and pulls out a list of nonterminals. The nonterminals keep
@@ -22,18 +22,17 @@ public class Parser {
 	List<Token> tokens = new ArrayList<Token>();
 
 	List<ProductionRule> productionRules = new ArrayList<ProductionRule>();
-	
+	Map<String, Token> idMap = new HashMap<String, Token>();
+
 	public Parser(Set<NonTerminal> nonTerminals,List<Token> tokens,List<ProductionRule> productionRules){
 		this.nonTerminals = nonTerminals;
 		this.tokens = tokens;
 		this.productionRules = productionRules;
 	}
 
-
-
-	public Parser() {
-		File inFile = new File("grammar.txt");
-
+	public Parser(String grammarFile, String specFile, String scriptFile) {
+		File inFile = new File(grammarFile);
+	  ScannerGenerator.create(specFile, scriptFile);
 		try {
 			Scanner in = new Scanner(inFile);
 
@@ -63,8 +62,13 @@ public class Parser {
 			e.printStackTrace();
 		}
 
-
     createFirstSets(nonTerminals);
+    for (Token t : tokens) {
+      int tokloc = ScannerGenerator.tokens.indexOf(t.getText());
+      if (tokloc != -1) {
+        idMap.put(ScannerGenerator.ids.get(tokloc), t);
+      }
+    }
 	}
 
 	/**
@@ -262,19 +266,20 @@ public class Parser {
         }
       }
     }
+    createFollowSet(nonterminals);
   }
 
-	
+
 	public ParsingTable buildTable(){
 		tokens.add(new Token("$"));
-		ParsingTable table = new ParsingTable(tokens.size(),nonTerminals.size(),tokens,nonTerminals);
+		ParsingTable table = new ParsingTable(tokens.size(),nonTerminals.size(),tokens,nonTerminals, idMap);
 		for(NonTerminal nt : nonTerminals){
 			for(Rule r : nt.getRules()){
 				Symbol s =r.getRule().get(0);
 				if(s instanceof Token){
-					if(s.getText() == "<epsilon>"){
+					if(s.getText().equals("<epsilon>")) {
 						for(Token t : nt.getFollowSet()){
-							table.addEntry(nt,(Token) t, new ProductionRule(nt,r.getRule()));
+							table.addEntry(nt,t, new ProductionRule(nt,r.getRule()));
 						}
 					}
 					else
@@ -294,35 +299,138 @@ public class Parser {
 				}
 			}
 		}
-		
+
 		return table;
 	}
-	
+
   public static void createFollowSet(Set<NonTerminal> nonTerminals) {
+    Map<String, NonTerminal> nonTerminalMap = new HashMap<String, NonTerminal>();
+    for (NonTerminal nt : nonTerminals) {
+      nonTerminalMap.put(nt.getText(), nt);
+    }
+
     NonTerminal start = nonTerminals.iterator().next();
     start.addToFollowSet(new Token("$"));
     boolean changed = false;
+    int d = 0;
     do {
-	    for (NonTerminal nt : nonTerminals) {
-
+      changed = false;
+	    for (NonTerminal a : nonTerminals) {
+	      for (Rule r : a.getRules()) {
+	        List<Symbol> xs = r.getRule();
+	        for (int i = 0; i < xs.size(); i++) {
+	          String xiName = xs.get(i).getText();
+	          if (nonTerminalMap.containsKey(xiName)) {
+	            Set<Token> newStuff = new HashSet<Token>();
+	            for (int j = i + 1; j < xs.size(); j++) {
+	              String xj = xs.get(j).getText();
+	              if (nonTerminalMap.containsKey(xj)) {
+	                newStuff.addAll(nonTerminalMap.get(xj).getFirstSet());
+	              } else {
+	                newStuff.add(new Token(xj));
+	              }
+	            }
+	            boolean hasEpsilon = newStuff.remove(new Token("<epsilon>"));
+	            NonTerminal xi = nonTerminalMap.get(xiName);
+	            if (i == xs.size() - 1) {
+	                xi.followSet.addAll(a.followSet);
+	            }
+	            int oldSize = xi.followSet.size();
+	            xi.followSet.addAll(newStuff);
+	            if (xi.followSet.size() > oldSize) {
+	              changed = true;
+	            }
+	            oldSize = xi.followSet.size();
+	            if (hasEpsilon) {
+	              xi.followSet.addAll(a.followSet);
+	              if (xi.followSet.size() > oldSize) {
+	                changed = true;
+	              }
+	            }
+	          }
+	        }
+	      }
 	    }
 
     } while (changed);
   }
 
+  public boolean walkTable() {
+    List<String> tokens = ScannerGenerator.tokens;
+    List<String> ids = ScannerGenerator.ids;
+
+    ParsingTable pt = buildTable();
+    pt.printTable();
+    Map<String, NonTerminal> ntMap = new HashMap<String, NonTerminal>();
+    for (NonTerminal nt : nonTerminals) {
+      ntMap.put(nt.getText(), nt);
+    }
+
+    Stack<Symbol> parsingStack = new Stack<Symbol>();
+    Stack<Token> inputStack = new Stack<Token>();
+    inputStack.push(new Token("$"));
+    for (int i = ids.size() - 1; i >= 0; i--) {
+      inputStack.push(new Token(ids.get(i)));
+    }
+
+    parsingStack.push(new Symbol("$"));
+    parsingStack.push(nonTerminals.iterator().next());
+
+    while (true) {
+
+      System.out.println(parsingStack + "  " + inputStack);
+      Symbol parseTop = parsingStack.peek();
+      Token inputTop = inputStack.peek();
+      if (inputTop.equals(parseTop) && parseTop.equals(new Symbol("$"))) {
+        System.out.println("Accept");
+        return true;
+      }
+
+      if (parseTop instanceof NonTerminal) {
+        NonTerminal ptnt = (NonTerminal) parseTop;
+        System.out.printf("Indexing at: [%s][%s]\n", ptnt.toString(), inputTop.toString());
+        ProductionRule pr = null;
+        try {
+          pr = pt.get(ptnt, inputTop);
+        } catch (Exception e) {
+          System.out.println("Error while parsing: "+inputTop.toString());
+          return false;
+        }
+        parsingStack.pop();
+        List<Symbol> rules = pr.getRule();
+        for (int i = rules.size() - 1; i >= 0; i--) {
+          if (!rules.get(i).getText().equals("<epsilon>")) {
+            parsingStack.push(rules.get(i));
+          }
+        }
+      } else {
+        Token other = null;
+        if (idMap.containsKey(inputTop.getText())) {
+          other = idMap.get(inputTop.getText());
+        }
+        if (parseTop.getText().equalsIgnoreCase(inputTop.getText()) || (other != null && parseTop.getText().equalsIgnoreCase(other.getText()))) {
+          System.out.println("Match: "+ parseTop);
+          parsingStack.pop();
+          inputStack.pop();
+        } else {
+          System.out.printf("Error: expected: %s, but got: %s\n", parseTop.getText(), inputTop.getText());
+          return false;
+        }
+      }
+
+    }
+  }
+
 	public static void main(String[] args) {
-		Parser p = new Parser();
+	  if (args.length < 3) {
+	    System.err.println("Improper arguments. Usage <grammar-file> <spec-file> <script-file>");
+	    System.exit(1);
+	  }
+		Parser p = new Parser(args[0], args[1], args[2]);
+		p.walkTable();
 
-		for (NonTerminal nt : p.nonTerminals) {
-		  System.out.println(nt);
-		}
 
-		for (NonTerminal nt : p.nonTerminals) {
-		  System.out.printf("First(%s) = %s\n", nt.getText(), nt.firstSet.toString());
-		}
-		System.out.println();
-		for (NonTerminal nt : p.nonTerminals) {
-		  System.out.printf("Follow(%s) = %s\n", nt.getText(), nt.followSet.toString());
-		}
+
+
 	}
 }
