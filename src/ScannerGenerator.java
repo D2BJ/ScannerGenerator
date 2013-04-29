@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,15 +18,28 @@ import java.util.Set;
 import java.util.Stack;
 
 public class ScannerGenerator {
+  public static List<String> tokens;
+  public static List<String> ids;
 
+  private ScannerGenerator() {
+
+  }
   public static void main(String[] args) {
     if (args.length < 2) {
       System.out.println("Usage: java ScannerGenerator <spec-file> <input-file>");
       System.exit(1);
     }
+    create(args[0], args[1], true);
+  }
+  public static void create(String specFile, String inputFile) {
+    create(specFile, inputFile, false);
+  }
+  private static void create(String specFile, String inputFile, boolean print) {
+    ids = new LinkedList<String>();
+    tokens = new LinkedList<String>();
 
     try {
-      BufferedReader in = new BufferedReader(new FileReader(new File(args[0])));
+      BufferedReader in = new BufferedReader(new FileReader(new File(specFile)));
       List<String> classSpec = new ArrayList<String>();
       List<String> spec = new ArrayList<String>();
       String line;
@@ -46,8 +61,8 @@ public class ScannerGenerator {
       for (Entry<String, Set<Character>> entry : classes.entrySet()) {
         nfas.put(entry.getKey(), new NFA(entry.getValue()));
       }
-      Map<String, NFA> regMap = new HashMap<String, NFA>();
-      Map<String, DFA> dfaMap = new HashMap<String, DFA>();
+      Map<String, NFA> regMap = new LinkedHashMap<String, NFA>();
+      Map<String, DFA> dfaMap = new LinkedHashMap<String, DFA>();
 
       for (String regex : spec) {
         String[] temp = regex.split(" ", 2);
@@ -63,21 +78,24 @@ public class ScannerGenerator {
       }
 
       // read in input file
-      in = new BufferedReader(new FileReader(new File(args[1])));
+      in = new BufferedReader(new FileReader(new File(inputFile)));
       List<String> inputs = new ArrayList<String>();
       while ((line = in.readLine()) != null) {
         inputs.add(line);
       }
       in.close();
-
       PrintWriter out = new PrintWriter(new FileWriter(new File(
           "OutputTokens.txt")));
-
       for (String input : inputs) {
         List<String> toks = breakLine(input, new char[]{'"', '[', '\''}, new char[]{'"', ']', '\''});
         for (String t : toks) {
-          walkdfa(t, dfaMap, out);
+          walkdfa(t, dfaMap);
         }
+      }
+      if (print) {
+	      for (int i = 0; i < tokens.size(); i++) {
+	        out.println(ids.get(i) + " " + tokens.get(i));
+	      }
       }
 
       out.close();
@@ -129,7 +147,7 @@ public class ScannerGenerator {
 
     return tokens;
   }
-  private static void walkdfa(String s, Map<String, DFA> map, PrintWriter out) {
+  private static void walkdfa(String s, Map<String, DFA> map) {
     while (s.length() > 0) {
       String acceptedDfa = "";
       int lastAccept = -1;
@@ -140,10 +158,13 @@ public class ScannerGenerator {
           if (dfa.getValue().accepts(sub)) {
             lastAccept = i;
             acceptedDfa = dfa.getKey().substring(1);
+            break;
           }
         }
       }
-      out.println(acceptedDfa + " " + s.substring(0, lastAccept));
+      ids.add(acceptedDfa);
+      tokens.add(s.substring(0, lastAccept));
+      //out.println(acceptedDfa + " " + s.substring(0, lastAccept));
       s = s.substring(lastAccept);
     }
   }
